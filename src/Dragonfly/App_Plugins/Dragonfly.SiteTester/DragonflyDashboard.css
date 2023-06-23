@@ -1,0 +1,15 @@
+﻿
+#DragonflyDashboard .top-border {
+    border-top: 2px solid #f3f3f5;
+}
+
+#DragonflyDashboard .no-left-padding {
+    padding-left: 0;
+}
+
+#DragonflyDashboard .no-background {
+    background-color: transparent;
+}
+
+
+

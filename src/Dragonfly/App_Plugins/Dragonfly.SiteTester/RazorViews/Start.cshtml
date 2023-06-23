@@ -1,0 +1,117 @@
+@using Dragonfly.NetModels;
+@using Dragonfly.NetHelpers
+@using Dragonfly.UmbracoSiteTester
+@using Dragonfly.UmbracoSiteTester.Models
+@using Newtonsoft.Json
+@using Dragonfly.UmbracoHelpers
+@using Umbraco.Extensions
+
+@inherits UmbracoViewPage<StatusMessage>
+
+@{
+    var status = Model;
+
+    //var DisplayTitle = Dragonfly.Umbraco7Helpers.Mvc.GetSafeViewDataString(ViewData, "DisplayTitle");
+    var FilesList = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewData(ViewData, "FilesList") as IEnumerable<FileInfo>;
+    var SpecialMessage = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewDataString(ViewData, "SpecialMessage");
+    var SpecialMessageClass = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewDataString(ViewData, "SpecialMessageClass");
+    var DeleteOptions = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewData(ViewData, "DeleteOptions") as Dictionary<string, string>;
+
+    var pvSS = HtmlHelpers.GetViewsPath() + "Partials/StylesScripts.cshtml";
+    var pvStatus = HtmlHelpers.GetViewsPath() + "Partials/StatusMessage.cshtml";
+    var pvFilesList = HtmlHelpers.GetViewsPath() + "Partials/FilesList.cshtml";
+    
+}
+<!DOCTYPE html>
+<html>
+<head>
+    @Html.Partial(pvSS, "styles")
+</head>
+<body>
+    <div class="container">
+
+        <h1>Dragonfly Site Tester</h1>
+        @if (!status.Success)
+        {
+            @Html.Partial(pvStatus, status)
+        }
+        else
+        {
+            if (SpecialMessage != "")
+            {
+                <div class="p-3 mb-2 @SpecialMessageClass text-white">
+                    @Html.Raw(SpecialMessage)
+                </div>
+            }
+
+            <h2>Previous Test Sets</h2>
+            @Html.Partial(pvFilesList, FilesList)
+        }
+
+        <div class="d-inline-flex p-2" style="padding: .5em 0;">
+            <a class="btn btn-sm btn-success mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester//TestAllNodesAndSave">Test All Nodes Now</a>
+        </div>
+        <div class="d-inline-flex p-2" style="padding: .5em 0;">
+            <a class="btn btn-sm btn-success mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester//TestDescendantNodesAndSave?StartNode=0">Test Subset of Nodes...</a>
+        </div>
+     
+
+        @if (DeleteOptions != null && DeleteOptions.Any())
+        {
+            <h5>Delete Test Results Sets</h5>
+            <div class="d-inline-flex p-2" style="padding: .5em 0;">
+                @foreach (var option in DeleteOptions)
+                {
+                    var url = string.Format("/umbraco/backoffice/Dragonfly/SiteTester//DeleteResultSets?Option={0}", option.Key);
+                    <a class="btn btn-sm btn-warning mr-2" href="@url">@option.Value</a>
+                }
+            </div>
+        }
+
+        <h2>Search HTML</h2>
+        <form action="/umbraco/backoffice/Dragonfly/SiteTester//SearchAllHtml" method="post">
+            <div class="form-group">
+                <label for="Filename">Test Result Set</label>
+                <select class="form-control" id="Filename" name="Filename" aria-describedby="testSetHelp">
+                    @foreach (FileInfo file in FilesList.OrderByDescending(n => n.Timestamp))
+                    {
+                        var logDate = HtmlHelpers.FormatUtcDateTime(file.Timestamp.ToUniversalTime());
+                        var startNodeId = file.StartNode;
+                        var nodeInfo = "";
+                        if (startNodeId == 0)
+                        {
+                            nodeInfo = "All Nodes";
+                        }
+                        else
+                        {
+                            var startNode = Umbraco.Content(startNodeId);
+                            if (startNode == null)
+                            {
+                                nodeInfo = string.Format("INVALID START NODE [{0}]", startNodeId);
+                            }
+                            else
+                            {
+                                nodeInfo = string.Format("'{0}' & descendants", startNode.Name);
+                            }
+                        }
+
+                        <option value="@file.Filename">@logDate : @nodeInfo</option>
+                    }
+                </select>
+                <small id="testSetHelp" class="form-text text-muted">Select the Test Result Set to search</small>
+            </div>
+            <div class="form-group">
+                <label for="Phrase">Search phrase</label>
+                <input type="text" class="form-control" id="Phrase" name="Phrase" aria-describedby="phraseHelp">
+                <small id="phraseHelp" class="form-text text-muted">Search will be an exact match.</small>
+            </div>
+
+            <button class="btn btn-primary" value="Submit" type="Submit">Search</button>
+        </form>
+
+    </div>
+
+    @*@Html.Partial(pvSS, "scripts")*@
+</body>
+</html>
+

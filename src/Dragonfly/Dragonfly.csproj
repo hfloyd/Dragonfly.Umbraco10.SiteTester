@@ -1,0 +1,108 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<MvcRazorCompileOnPublish>false</MvcRazorCompileOnPublish>
+		<ContentTargetFolders>content</ContentTargetFolders>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	</PropertyGroup>
+
+	<!-- Package Description-->
+	<PropertyGroup>
+		<PackageId>Dragonfly.Umbraco10.SiteTester</PackageId>
+		<Title>Dragonfly Umbraco 10 Site Tester</Title>
+		<Product>Dragonfly</Product>
+		<Description>Tools to test pages in an Umbraco 10 website</Description>
+
+		<PackageProjectUrl>https://dragonflylibraries.com/umbraco-packages/site-tester/</PackageProjectUrl>
+		<RepositoryType>GIT</RepositoryType>
+		<RepositoryUrl>https://github.com/hfloyd/Dragonfly.Umbraco10.SiteTester</RepositoryUrl>
+		<PackageIcon>Dragonfly-SiteTester-128.png</PackageIcon>
+		<PackageTags>Umbraco;umbraco-marketplace;Umbraco-10;Umbraco-11;Umbraco-12</PackageTags>
+
+		<PackageReleaseNotes>First v10 Release</PackageReleaseNotes>
+	</PropertyGroup>
+
+	<!-- Author Info + Legal-->
+	<PropertyGroup>
+		<Authors>HFloyd</Authors>
+		<Company>Heather Floyd</Company>
+		<Copyright>Heather Floyd [www.HeatherFloyd.com]</Copyright>
+
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+	</PropertyGroup>
+
+	<!-- Assembly Info-->
+	<PropertyGroup>
+		<RootNamespace>Dragonfly</RootNamespace>
+		<AssemblyName>Dragonfly.UmbracoSiteTester</AssemblyName>
+		<Version>0.1.0</Version>
+		<AssemblyVersion>$(Version)</AssemblyVersion>
+		<FileVersion>$(Version)</FileVersion>
+		<IncludeSymbols>True</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<!-- Include Package Items -->
+	<ItemGroup>
+		<None Include="..\..\Dragonfly-SiteTester-128.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\..\LICENSE.md">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+		<None Include="..\..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<!-- Packages-->
+	<ItemGroup>
+		<PackageReference Include="Dragonfly.Net5" Version="1.5.0" />
+		<PackageReference Include="Dragonfly.Umbraco9" Version="1.7.0" />
+		<PackageReference Include="Umbraco.Cms.Core" Version="[10.0.1,13.0.0]" />
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="[10.0.1,13.0.0]" PrivateAssets="All" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="[10.0.1,13.0.0]" PrivateAssets="All" />
+	</ItemGroup>
+
+	<!--Include App_Plugins & targets file-->
+	<ItemGroup>
+		<Content Include="App_Plugins\**\*.*">
+			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
+			<Pack>true</Pack>
+			<BuildAction>Content</BuildAction>
+			<IncludeInPackage>true</IncludeInPackage>
+			<CopyToOutput>true</CopyToOutput>
+		</Content>
+		<None Include="build\**\*.*">
+			<Pack>True</Pack>
+			<PackagePath>buildTransitive</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<!-- Included/Excluded Files -->
+	<ItemGroup>
+		<Compile Remove="UmbracoSiteTester\AdminActions.cs" />
+		<Compile Remove="UmbracoSiteTester\Controllers\ExceptionViewerController.cs" />
+		<Compile Remove="UmbracoSiteTester\Controllers\UmbracoRouteConfig.cs" />
+		<Compile Remove="UmbracoSiteTester\FullTextContentIndexer.cs" />
+		<Compile Remove="UmbracoSiteTester\Models\IDocumentRenderer.cs" />
+		<Compile Remove="UmbracoSiteTester\Models\IFullTextIndexer.cs" />
+		<Compile Remove="UmbracoSiteTester\Services\LinkGatheringService.cs" />
+		<Compile Remove="UmbracoSiteTester\Utilities\DBAccess.cs" />
+		<Compile Remove="UmbracoSiteTester\Utilities\GenericFactory.cs" />
+		<Compile Remove="UmbracoSiteTester\Utilities\HtmlCache.cs" />
+		<Compile Remove="UmbracoSiteTester\Utilities\HtmlStrip.cs" />
+		<Compile Remove="UmbracoSiteTester\Utilities\Library.cs" />
+		<Compile Remove="UmbracoSiteTester\Utilities\Manager.cs" />
+	</ItemGroup>
+
+	<Import Project="..\Custom.targets" />
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="REM XCOPY /s /y  &quot;$(TargetDir)$(TargetName).*&quot; &quot;C:\Users\...\bin\&quot;&#xD;&#xA;REM XCOPY /s /r /y  &quot;$(SolutionDir)$(ProjectName)\App_Plugins&quot;  &quot;C:\Users\...\App_Plugins&quot;&#xD;&#xA;REM XCOPY /s /r /y  &quot;$(SolutionDir)$(ProjectName)\Config&quot; &quot;C:\Users\...\Config&quot;" />
+	</Target>
+</Project>

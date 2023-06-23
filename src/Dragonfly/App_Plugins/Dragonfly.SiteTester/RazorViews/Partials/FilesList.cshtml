@@ -1,0 +1,49 @@
+@using Dragonfly.NetModels
+@using Dragonfly.Umbraco8SiteTester.Utilities
+@using Dragonfly.UmbracoSiteTester
+@using Newtonsoft.Json
+
+@inherits UmbracoViewPage<IEnumerable<Dragonfly.UmbracoSiteTester.Models.FileInfo>>
+
+@{
+    var pvException = HtmlHelpers.GetViewsPath() + "Partials/ExceptionDetailsLink.cshtml";
+}
+
+@if (Model != null && Model.Any())
+{
+    <ol>
+        @foreach (var parsedFile in Model.OrderByDescending(n => n.Timestamp))
+        {
+
+            var url = string.Format("/umbraco/backoffice/Dragonfly/SiteTester//ViewResults?FileName={0}", parsedFile.Filename);
+            var logDate = HtmlHelpers.FormatUtcDateTime(parsedFile.Timestamp.ToUniversalTime());
+            //var parsedFile = FilesIO.ParseFilePath(file.Key);
+            var startNodeId = parsedFile.StartNode;
+            var nodeInfo = "";
+            if (startNodeId == 0)
+            {
+                nodeInfo = "All Nodes";
+            }
+            else
+            {
+                var startNode = Umbraco.Content(startNodeId);
+                if (startNode == null)
+                {
+                    nodeInfo = string.Format("INVALID START NODE [{0}]", startNodeId);
+                }
+                else
+                {
+                    nodeInfo = string.Format("'{0}' & descendants", startNode.Name);
+                }
+            }
+
+            <li>
+                <a href="@url" target="_blank">@logDate : @nodeInfo</a>
+            </li>
+        }
+    </ol>
+}
+else
+{
+    <i style="color:red;">There are no test sets available currently.</i>
+}

@@ -1,0 +1,19 @@
+﻿{
+"dashboards":  [
+        {
+            "alias": "Dragonfly.SiteTester",
+            "view":  "~/App_Plugins/Dragonfly.SiteTester/dashboard.html",
+            "sections":  [ "content" ],
+            "weight":100
+        }
+    ],
+
+    "javascript": [
+		
+    ],
+
+    "css": [
+	
+"/App_Plugins/Dragonfly.SiteTester/DragonflyDashboard.css"    ]
+
+}

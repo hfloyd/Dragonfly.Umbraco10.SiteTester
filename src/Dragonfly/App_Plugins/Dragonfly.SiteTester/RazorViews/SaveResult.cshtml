@@ -1,0 +1,90 @@
+@using Dragonfly.NetModels;
+@using Dragonfly.UmbracoSiteTester
+@using Newtonsoft.Json
+
+@inherits UmbracoViewPage<StatusMessage>
+
+@{
+    var status = Model;
+
+    var Message = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewDataString(ViewData, "Message");
+    var Success = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewDataBool(ViewData, "Success");
+    //var LogData = Dragonfly.Umbraco7Helpers.Mvc.GetSafeViewData(ViewData, "LogData") as ProductAvailabilityNotificationsLog;
+    var Filename = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewDataString(ViewData, "Filename");
+    
+    var fileUrl = string.Format("/umbraco/backoffice/Dragonfly/SiteTester//ViewResults?FileName={0}", Filename);
+
+    //Column Widths
+    var col1Class = "col-sm-3";
+    var col2Class = "col-sm-9";
+
+    var pvException = HtmlHelpers.GetViewsPath() + "Partials/ExceptionDetailsLink.cshtml";
+    var pvSS = HtmlHelpers.GetViewsPath() + "Partials/StylesScripts.cshtml";
+    var pvStatus = HtmlHelpers.GetViewsPath() + "Partials/StatusMessage.cshtml";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    @Html.Partial(pvSS, "styles")
+</head>
+<body>
+    <div class="container">
+
+        <div class="d-inline-flex p-2" style="padding: .5em 0;">
+            <a class="btn btn-sm btn-primary mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester//Start">Back to Start</a>
+        </div>
+
+        <h1>Save Test Results</h1>
+
+        @if (!Success)
+        {
+            @Html.Partial(pvStatus, status)
+        }
+        else
+        {
+            <h3>@Message</h3>
+            <div class="card card-default">
+                <h5 class="card-header">Result Details</h5>
+                <div class="card-body">
+                    @if (status != null)
+                    {
+                        <dl class="row">
+                            <dt class="@col1Class">Main Message</dt>
+                            <dd class="@col2Class">
+                                <b> @status.Message</b><br />
+                                @status.MessageDetails
+                            </dd>
+                        </dl>
+                        <dl class="row">
+                            <dt class="@col1Class">View Data</dt>
+                            <dd class="@col2Class">
+                                <a class="btn btn-sm btn-success mr-2" href="@fileUrl">View Results</a>
+                            </dd>
+                        </dl>
+
+                        foreach (var result in status.InnerStatuses)
+                        {
+                            <dl class="row">
+                                <dt class="@col1Class">@result.Code</dt>
+                                <dd class="@col2Class">
+                                    <b> @result.Message</b><br />
+                                    @result.MessageDetails
+                                    @if (result.RelatedException != null)
+                                    {
+                                        <br /><pre>@result.RelatedException.Message</pre>
+                                        @Html.Partial(pvException, result.RelatedException)
+                                    }
+                                </dd>
+                            </dl>
+                        }
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    @*@Html.Partial(pvSS, "scripts")*@
+
+</body>
+</html>
+

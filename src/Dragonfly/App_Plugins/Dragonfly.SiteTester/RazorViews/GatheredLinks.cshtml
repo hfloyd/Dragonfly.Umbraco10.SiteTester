@@ -1,0 +1,274 @@
+@using System.Web.Mvc.Html
+@using Dragonfly.NetHelpers
+@using Dragonfly.NetModels;
+@using Dragonfly.UmbracoSiteTester
+@using Dragonfly.UmbracoSiteTester.Models
+
+@inherits Umbraco.Web.Mvc.UmbracoViewPage<StatusMessage>
+
+@{
+    var status = Model;
+
+    //var DisplayTitle = Dragonfly.Umbraco7Helpers.Mvc.GetSafeViewDataString(ViewData, "DisplayTitle");
+    var TestResultSet = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewData(ViewData, "TestResultSet") as TestResultSet;
+    var FilesList = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewData(ViewData, "FilesList") as IEnumerable<FileInfo>;
+    var DisplayMode = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewDataString(ViewData, "DisplayMode");
+    var FullLinksSet = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewData(ViewData, "FullLinksSet") as LinksSet;
+
+    //Column Widths
+    var col1Class = "col-sm-3";
+    var col2Class = "col-sm-9";
+
+    var pvException = HtmlHelpers.GetViewsPath() + "Partials/ExceptionDetailsLink.cshtml";
+    var pvSS = HtmlHelpers.GetViewsPath() + "Partials/StylesScripts.cshtml";
+    var pvStatus = HtmlHelpers.GetViewsPath() + "Partials/StatusMessage.cshtml";
+    var pvFilesList = HtmlHelpers.GetViewsPath() + "Partials/FilesList.cshtml";
+
+    //QS Vals
+    var fileName = Request.QueryString["FileName"];
+    var typeFilter = Request.QueryString["TypeFilter"];
+    var doTestFilter = Request.QueryString["DoTestFilter"];
+    var resultFilter = Request.QueryString["ResultFilter"];
+
+    //Filtering
+    var isTypeFiltered = !string.IsNullOrEmpty(typeFilter);
+    var isDoTestFiltered = !string.IsNullOrEmpty(doTestFilter);
+    var isResultFiltered = !string.IsNullOrEmpty(resultFilter);
+
+    var displayTitle = "All Types";
+    IEnumerable<LinkTest> displayLinks;
+
+    if (isTypeFiltered)
+    {
+        displayTitle = typeFilter;
+        displayLinks = FullLinksSet.LinkTests.Where(n => n.Type.ToString() == typeFilter);
+    }
+    else if (isDoTestFiltered)
+    {
+        displayTitle = doTestFilter.ToLower() == "true" ? "Tested Links" : "UnTested Links";
+        displayLinks = FullLinksSet.LinkTests.Where(n => n.DoTest.ToString() == doTestFilter);
+    }
+    else if (isResultFiltered)
+    {
+        displayTitle ="Test Result : "+ resultFilter;
+        var testsWithResults = FullLinksSet.LinkTests.Where(n => n.Result!=null);
+        displayLinks = testsWithResults.Where(n => n.Result.Result.ToString() == resultFilter);
+    }
+    else //no filtering
+    {
+        displayLinks = FullLinksSet.LinkTests;
+    }
+
+    //Remove all filters for baseUrl
+    var baseUrl = Request.Url.ToString();
+    baseUrl = Dragonfly.NetHelpers.Url.RemoveQueryStringKeyFromUrl(baseUrl, "DoTestFilter");
+    baseUrl = Dragonfly.NetHelpers.Url.RemoveQueryStringKeyFromUrl(baseUrl, "TypeFilter");
+    baseUrl = Dragonfly.NetHelpers.Url.RemoveQueryStringKeyFromUrl(baseUrl, "ResultFilter");
+
+    var resultsDate = TestResultSet.TestStartTimestamp != DateTime.MinValue ? HtmlHelpers.FormatUtcDateTime(TestResultSet.TestStartTimestamp.ToUniversalTime()) : "Unknown";
+    var durationSpan = (TestResultSet.TestEndTimestamp - TestResultSet.TestStartTimestamp);
+    var nodeInfo = TestResultSet.StartNode == 0 ? "All Nodes" : string.Format("'{0}' & descendants", Umbraco.Content(TestResultSet.StartNode).Name);
+
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    @Html.Partial(pvSS, "styles")
+</head>
+<body>
+    <div class="container">
+
+        <div class="d-inline-flex p-2" style="padding: .5em 0;">
+            <a class="btn btn-sm btn-primary mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester//Start">Back to Start</a>
+            <a class="btn btn-sm btn-info mr-2" href="@baseUrl">Remove All Filters</a>
+
+            <!--  <a class="btn btn-sm btn-success mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester//TestAllNodesAndSave">Test All Nodes Now</a>-->
+        </div>
+        
+        <h1>Links</h1>
+
+        @if (!status.Success)
+        {
+            @Html.Partial(pvStatus, status)
+        }
+        else
+        {
+            if (DisplayMode == "list")
+            {
+                @Html.Partial(pvFilesList, FilesList)
+            }
+            else if (DisplayMode == "results")
+            {
+                if (TestResultSet.HasLinkTestResults)
+                {
+                    <div class="card card-default">
+                        <h5 class="card-header">Summary</h5>
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="@col1Class">Date/Time</dt>
+                                <dd class="@col2Class">@resultsDate</dd>
+                            </dl>
+                            <dl class="row">
+                                <dt class="@col1Class">Nodes Tested</dt>
+                                <dd class="@col2Class">@nodeInfo</dd>
+                            </dl>
+                            <dl class="row">
+                                <dt class="@col1Class">Links Summary</dt>
+                                <dd class="@col2Class">
+                                    @foreach (var summ in FullLinksSet.LinkTypesSummary)
+                                    {
+                                        var isTested = FullLinksSet.TypesTested.Contains(summ.Key);
+                                        var marker = isTested ? "*" : "";
+                                        var filterUrl = Dragonfly.NetHelpers.Url.AppendQueryStringToUrl(baseUrl, "TypeFilter", summ.Key);
+                                    <div><a href="@filterUrl"><b>@summ.Key</b></a> : <span>@summ.Value</span>@marker</div>
+                                    }
+                                </dd>
+                            </dl>
+                            <dl class="row">
+                                <dt class="@col1Class">Links Tested</dt>
+                                <dd class="@col2Class">
+                                    @foreach (var summ in FullLinksSet.DoTestSummary)
+                                    {
+                                        var filterUrl = Dragonfly.NetHelpers.Url.AppendQueryStringToUrl(baseUrl, "DoTestFilter", summ.Key.ToString());
+                                        <div><a href="@filterUrl"><b>@summ.Key</b></a> : <span>@summ.Value</span></div>
+                                    }
+                                </dd>
+                            </dl>
+                            <dl class="row">
+                                <dt class="@col1Class">Test Results</dt>
+                                <dd class="@col2Class">
+                                    @foreach (var summ in FullLinksSet.ResultsSummary)
+                                    {
+                                        var filterUrl = Dragonfly.NetHelpers.Url.AppendQueryStringToUrl(baseUrl, "ResultFilter", summ.Key.ToString());
+                                        <div><a href="@filterUrl"><b>@summ.Key</b></a> : <span>@summ.Value</span></div>
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <h2>Displaying @displayTitle </h2>
+
+                    var counter = 0;
+                    <table id="umbracodata" class="table table-striped table-bordered table-hover table-sm" cellspacing="0" style="width: 100%">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Actions</th>
+                                <th>On Node Id</th>
+                                <th>Url</th>
+                                <th>Type</th>
+                                <th>Do Test?</th>
+                                <th>Result</th>
+                                <th>Status Code</th>
+                                <th>Status Message</th>
+                                @* <th>Exception</th>*@
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var link in displayLinks)
+                            {
+                                counter++;
+
+                                <tr>
+                                    <td>@counter</td>
+                                    <td>
+                                        <!--Actions-->
+                                        <a href="/umbraco/#/content/content/edit/@link.OnNode" target="_blank">Edit Node</a>
+                                        @if (link.Url != "")
+                                        {
+                                            <span> | </span><a href="@link.Url" target="_blank">View Url</a>
+                                        }
+                                    </td>
+                                    <td>@link.OnNode</td>
+                                    <td>@link.Url</td>
+                                    <td>@link.Type</td>
+                                    <td>@link.DoTest</td>
+                                    <td>
+                                        @if (link.Result != null)
+                                        {
+                                            @link.Result.Result
+                                        }
+                                        else
+                                        {<span>No Result</span>}
+                                    </td>
+                                    <td>
+                                        @if (link.Result != null)
+                                        {
+                                            @link.Result.StatusCode
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (link.Result != null)
+                                        {
+                                            @link.Result.StatusCodeMessage
+                                        }
+                                    </td>
+
+                                    @*   <td>@result.ContentTypeAlias</td>
+                                    <td>@result.NodeId</td>
+                                    <td>
+                                        @if (result.ErrorException != null)
+                                        {
+                                            <pre>@result.ErrorException.Message</pre>
+                                            @Html.Partial(pvException, result.ErrorException)
+                                        }
+                                    </td>*@
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                }
+                else
+                {
+                    var retestUrl = "/umbraco/backoffice/Dragonfly/SiteTester//TestAllNodesAndSave";
+                    if (TestResultSet.StartNode != 0)
+                    {
+                        retestUrl = string.Format("/umbraco/backoffice/Dragonfly/SiteTester//TestDescendantNodesAndSave?StartNode={0}", TestResultSet.StartNode);
+                    }
+
+                    <i style="color:red;">There is no data available currently.</i>
+                    <div class="d-inline-flex p-2" style="padding: .5em 0;">
+                        <a class="btn btn-sm btn-success mr-2" href="@retestUrl">Retest Nodes Now</a>
+                    </div>
+
+                }
+            }
+        }
+
+    </div>
+
+    @Html.Partial(pvSS, "scripts")
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            // Setup - add a text input to each footer cell
+            $('#umbracodata tfoot th').each(function () {
+                var title = $(this).text();
+                $(this).html('<input type="text" placeholder="Search ' + title + '" />');
+            });
+
+            $('#umbracodata').DataTable({
+                "lengthMenu": [[10, 25, 50, - 1], [10, 25, 50, "All"]]
+            });
+
+            // Apply the search
+            table.columns().every(function () {
+                var that = this;
+
+                $('input', this.footer()).on('keyup change', function () {
+                    if (that.search() !== this.value) {
+                        that
+                            .search(this.value)
+                            .draw();
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>

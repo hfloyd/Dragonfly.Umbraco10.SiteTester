@@ -1,0 +1,11 @@
+@using Dragonfly.UmbracoSiteTester
+@inherits UmbracoViewPage<DateTime>
+
+@if (Model != DateTime.MinValue)
+{
+    <span>@HtmlHelpers.FormatUtcDateTime(Model.ToUniversalTime(), HtmlHelpers.TimezoneFormatOption.Abbreviated, DateFormat: "M/d/yyyy")</span>
+}
+@*else
+    {
+        <span> N/A </span>
+    }*@
