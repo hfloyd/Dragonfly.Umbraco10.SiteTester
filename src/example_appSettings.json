@@ -1,7 +1,7 @@
 {
     "DragonflySiteTester": {
         // "HttpUrl" is needed for HTTP Rendering, determines URL of the default page on your host. 
-        "HttpUrl": "https://MySite.com/default",
+        "HttpUrl": "https://MySite.com",
         "HttpHost": "MYSITE.COM", //Domain name of your site e.g. 'www.yoursite.com'
         "IgnoreSslErrors": false, //Set to true if on a local development environment, or getting SSL Errors 
         "HttpTimeout": 360, //Rendering request timeout in seconds
