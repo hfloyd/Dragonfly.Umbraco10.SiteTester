@@ -6,12 +6,12 @@
         "IgnoreSslErrors": false, //Set to true if on a local development environment, or getting SSL Errors 
         "HttpTimeout": 360, //Rendering request timeout in seconds
         "ScriptTimeout": 1200, //Override default IIS timeout in seconds
+         "ContentTypesToExclude": [
+            "myDocTypeAlias"
+        ], //Document Types to Exclude - Any DocType aliases added here will be skipped during testing. 
         "DataStoragePath": "/App_Data/DragonflySiteTester/", //Location of the saved Test Result Sets
         "StoreRenderedHtml": false, //Store Full Rendered HTML in ResultSets? *Warning: This adds a LOT of extra data to saved result sets, which means larger .json files and slower load-times for Viewing Results
         "AlsoTestOnPageLinks": false, //Gather all on-page out-bound links and test them as well? *Warning: This adds a LOT of extra data to saved result sets, which means larger .json files and slower load-times for Viewing Results
-        "ContentTypesToExclude": [
-            "myDocTypeAlias"
-        ], //Document Types to Exclude - Any DocType aliases added here will be skipped during testing. 
         "LinkTypesToTest": [
             "InternalPage",
             "InternalPageWithQueryString",
