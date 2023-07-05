@@ -1,12 +1,11 @@
-@using Dragonfly.NetModels;
-@using Dragonfly.NetHelpers
-@using Dragonfly.UmbracoSiteTester
-@using Newtonsoft.Json
-@using Umbraco.Cms.Core.Models.PublishedContent
+@using Dragonfly.UmbracoSiteTester;
+@using Umbraco.Cms.Core.Models.PublishedContent;
+
+@inject SiteTesterService TesterService
 
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<IEnumerable<IPublishedContent>>
-
 @{
+	var config = TesterService.GetAppDataConfig();
     var rootNodes = Model;
 
     //var DisplayTitle = Dragonfly.Umbraco7Helpers.Mvc.GetSafeViewDataString(ViewData, "DisplayTitle");
@@ -15,9 +14,9 @@
     //var SpecialMessageClass = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewDataString(ViewData, "SpecialMessageClass");
     //var DeleteOptions = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewData(ViewData, "DeleteOptions") as Dictionary<string, string>;
 
-    var pvSS = HtmlHelpers.GetViewsPath() + "Partials/StylesScripts.cshtml";
-    var pvStatus = HtmlHelpers.GetViewsPath() + "Partials/StatusMessage.cshtml";
-    var pvFilesList = HtmlHelpers.GetViewsPath() + "Partials/FilesList.cshtml";
+    var pvSS = HtmlHelpers.GetViewsPath(config) + "Partials/StylesScripts.cshtml";
+    var pvStatus = HtmlHelpers.GetViewsPath(config) + "Partials/StatusMessage.cshtml";
+    var pvFilesList = HtmlHelpers.GetViewsPath(config) + "Partials/FilesList.cshtml";
 }
 <!DOCTYPE html>
 <html>
@@ -32,18 +31,15 @@
 
         @foreach (var node in rootNodes)
         {
-            @ListNodes(node)
+	        ListNodes(node);
         }
 
         @*<div class="d-inline-flex p-2" style="padding: .5em 0;">
-                <a class="btn btn-sm btn-success mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester//TestAllNodesAndSave">Test All Nodes Now</a>
+                <a class="btn btn-sm btn-success mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester/TestAllNodesAndSave">Test All Nodes Now</a>
             </div>
             <div class="d-inline-flex p-2" style="padding: .5em 0;">
-                <a class="btn btn-sm btn-success mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester//TestDescendantNodesAndSave?StartNode=0">Test Descendant Nodes Now</a>
+                <a class="btn btn-sm btn-success mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester/TestDescendantNodesAndSave?StartNode=0">Test Descendant Nodes Now</a>
             </div>*@
-
-
-
 
     </div>
 
@@ -51,19 +47,22 @@
 </body>
 </html>
 
-@helper ListNodes(IPublishedContent StartNode)
+@functions
 {
-    var url = string.Format("/umbraco/backoffice/Dragonfly/SiteTester//TestDescendantNodesAndSave?StartNode={0}", StartNode.Id);
+	void ListNodes(IPublishedContent StartNode)
+	{
+		var url = string.Format("/umbraco/backoffice/Dragonfly/SiteTester/TestDescendantNodesAndSave?StartNode={0}", StartNode.Id);
 
-<ul>
-    <li class="level-@StartNode.Level">
-        <a href="@url">@StartNode.Name</a>
+		<ul>
+			<li class="level-@StartNode.Level">
+				<a href="@url">@StartNode.Name</a>
 
-        @foreach (var item in StartNode.Children)
-        {
-            @ListNodes(item)
-        }
-    </li>
-</ul>
+				@foreach (var item in StartNode.Children)
+				{
+					ListNodes(item);
+				}
+			</li>
+		</ul>
+	}
 }
 

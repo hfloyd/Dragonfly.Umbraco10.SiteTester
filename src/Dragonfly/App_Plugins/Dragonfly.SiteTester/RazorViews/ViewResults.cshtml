@@ -1,12 +1,13 @@
-@using System.Web.Mvc.Html
 @using Dragonfly.NetHelpers
 @using Dragonfly.NetModels;
 @using Dragonfly.UmbracoSiteTester
 @using Dragonfly.UmbracoSiteTester.Models
 
-@inherits Umbraco.Web.Mvc.UmbracoViewPage<StatusMessage>
+@inject SiteTesterService TesterService
 
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<StatusMessage>
 @{
+	var config = TesterService.GetAppDataConfig();
     var status = Model;
 
     //var DisplayTitle = Dragonfly.Umbraco7Helpers.Mvc.GetSafeViewDataString(ViewData, "DisplayTitle");
@@ -15,18 +16,18 @@
     var DisplayMode = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewDataString(ViewData, "DisplayMode");
     var ResultFilter = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewDataString(ViewData, "ResultFilter");
 
-    var fileName = Request.QueryString["FileName"];
+    var fileName = Context.Request.Query["FileName"];
 
     //Column Widths
     var col1Class = "col-sm-3";
     var col2Class = "col-sm-9";
 
-    var pvException = HtmlHelpers.GetViewsPath() + "Partials/ExceptionDetailsLink.cshtml";
-    var pvSS = HtmlHelpers.GetViewsPath() + "Partials/StylesScripts.cshtml";
-    var pvStatus = HtmlHelpers.GetViewsPath() + "Partials/StatusMessage.cshtml";
-    var pvFilesList = HtmlHelpers.GetViewsPath() + "Partials/FilesList.cshtml";
+    var pvException = HtmlHelpers.GetViewsPath(config) + "Partials/ExceptionDetailsLink.cshtml";
+    var pvSS = HtmlHelpers.GetViewsPath(config) + "Partials/StylesScripts.cshtml";
+    var pvStatus = HtmlHelpers.GetViewsPath(config) + "Partials/StatusMessage.cshtml";
+    var pvFilesList = HtmlHelpers.GetViewsPath(config) + "Partials/FilesList.cshtml";
 
-    var resultsDate = TestResultSet.TestStartTimestamp != DateTime.MinValue ? HtmlHelpers.FormatUtcDateTime(TestResultSet.TestStartTimestamp.ToUniversalTime()) : "Unknown";
+    var resultsDate = TestResultSet.TestStartTimestamp != DateTime.MinValue ? HtmlHelpers.FormatUtcDateTime(config, TestResultSet.TestStartTimestamp.ToUniversalTime()) : "Unknown";
     var durationSpan = (TestResultSet.TestEndTimestamp - TestResultSet.TestStartTimestamp);
     var nodeInfo = TestResultSet.StartNode == 0 ? "All Nodes" : string.Format("'{0}' & descendants", Umbraco.Content(TestResultSet.StartNode).Name);
 
@@ -40,8 +41,8 @@
     <div class="container">
 
         <div class="d-inline-flex p-2" style="padding: .5em 0;">
-            <a class="btn btn-sm btn-primary mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester//Start">Back to Start</a>
-            <a class="btn btn-sm btn-success mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester//TestAllNodesAndSave">Test All Nodes Now</a>
+            <a class="btn btn-sm btn-primary mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester/Start">Back to Start</a>
+            <a class="btn btn-sm btn-success mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester/TestAllNodesAndSave">Test All Nodes Now</a>
         </div>
         <h1>Test Results</h1>
 
@@ -80,7 +81,7 @@
                                 <dd class="@col2Class">
                                     @foreach (var summ in TestResultSet.Summary)
                                     {
-                                        var filterUrl = Dragonfly.NetHelpers.Url.AppendQueryStringToUrl(Request.Url, "ResultFilter", summ.Key);
+                                        var filterUrl = Dragonfly.NetHelpers.Urls.AppendQueryStringToUrl(Context.Request.Url(), "ResultFilter", summ.Key);
                                         <div><a href="@filterUrl"><b>@summ.Key</b></a> : <span>@summ.Value</span></div>
                                     }
                                 </dd>
@@ -90,7 +91,7 @@
                                 <dd class="@col2Class">
                                     @if (TestResultSet.HasStoredHtml)
                                     {
-                                        var url = string.Format("/umbraco/backoffice/Dragonfly/SiteTester//GatherOutgoingLinks?FileName={0}", fileName);
+                                        var url = string.Format("/umbraco/backoffice/Dragonfly/SiteTester/GatherOutgoingLinks?FileName={0}", fileName);
 
                                         <text>Yes</text>
                                         if (TestResultSet.HasLinkTestResults)
@@ -110,7 +111,7 @@
                                 <dd class="@col2Class">
                                     @if (TestResultSet.HasLinkTestResults)
                                     {
-                                        var url = string.Format("/umbraco/backoffice/Dragonfly/SiteTester//GatherOutgoingLinks?FileName={0}", fileName);
+                                        var url = string.Format("/umbraco/backoffice/Dragonfly/SiteTester/GatherOutgoingLinks?FileName={0}", fileName);
 
                                         <text>Yes</text>
                                         if (TestResultSet.HasLinkTestResults)
@@ -174,10 +175,10 @@
                                     <td>@result.ContentTypeAlias</td>
                                     <td>@result.NodeId</td>
                                     <td>
-                                        @if (result.ErrorException != null)
+                                        @if (result.ExceptionInfo != null)
                                         {
-                                            <pre>@result.ErrorException.Message</pre>
-                                            @Html.Partial(pvException, result.ErrorException)
+                                            <pre>@result.ExceptionInfo.Message</pre>
+                                            @Html.Partial(pvException, result.ExceptionInfo)
                                         }
                                     </td>
                                 </tr>

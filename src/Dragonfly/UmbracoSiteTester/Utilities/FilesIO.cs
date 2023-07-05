@@ -1,4 +1,4 @@
-﻿namespace Dragonfly.UmbracoSiteTester.Utilities
+﻿namespace Dragonfly.UmbracoSiteTester
 {
 	using System;
 	using System.Collections.Generic;
@@ -33,13 +33,17 @@
 		private Config _config;
 
 		public FilesIO(DependencyLoader dependencies,
-			ILogger logger,
-			Config TesterConfig)
+			ILogger<FilesIO> logger)
 		{
 			_FileHelperService = dependencies.DragonflyFileHelperService;
 			_logger = logger;
+		}
+		
+		public void SetConfig(Config TesterConfig)
+		{
 			_config = TesterConfig;
 		}
+		
 		internal string DataPath()
 		{
 			return _config.DataStoragePath;
@@ -624,5 +628,6 @@
 			}
 		}
 
+		
 	}
 }

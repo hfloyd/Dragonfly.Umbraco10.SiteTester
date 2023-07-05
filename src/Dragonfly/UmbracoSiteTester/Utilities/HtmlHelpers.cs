@@ -50,7 +50,7 @@
 
         public static string GetViewsPath(Config TesterConfig)
         {
-            var path = TesterConfig.GetAppPluginsPath() + "Views/";
+            var path = TesterConfig.GetAppPluginsPath() + "RazorViews/";
             return path;
         }
     }

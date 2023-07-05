@@ -37,11 +37,12 @@
 	<PropertyGroup>
 		<RootNamespace>Dragonfly</RootNamespace>
 		<AssemblyName>Dragonfly.UmbracoSiteTester</AssemblyName>
-		<Version>0.1.0</Version>
+		<Version>1.0.0</Version>
 		<AssemblyVersion>$(Version)</AssemblyVersion>
 		<FileVersion>$(Version)</FileVersion>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<!-- Include Package Items -->
@@ -62,7 +63,7 @@
 
 	<!-- Packages-->
 	<ItemGroup>
-		<PackageReference Include="Dragonfly.Net5" Version="1.5.0" />
+		<PackageReference Include="Dragonfly.Net5" Version="1.6.0" />
 		<PackageReference Include="Dragonfly.Umbraco9" Version="1.7.0" />
 		<PackageReference Include="Umbraco.Cms.Core" Version="[10.0.1,13.0.0]" />
 		<PackageReference Include="Umbraco.Cms.Web.Website" Version="[10.0.1,13.0.0]" PrivateAssets="All" />
@@ -71,7 +72,7 @@
 
 	<!--Include App_Plugins & targets file-->
 	<ItemGroup>
-		<Content Include="App_Plugins\**\*.*">
+		<Content Include="App_Plugins\Dragonfly.SiteTester\**\*.*">
 			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
 			<Pack>true</Pack>
 			<BuildAction>Content</BuildAction>

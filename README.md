@@ -29,7 +29,7 @@ dotnet add package Dragonfly.Umbraco10.SiteTester
 ## Usage ##
 
 After installation, make sure you are logged-in as a User in the Umbraco back-office, then visit the Url:
-http://YOURSITE.COM/umbraco/backoffice/Dragonfly/SiteTester//Start
+http://YOURSITE.COM/umbraco/backoffice/Dragonfly/SiteTester/Start
 
 *NOTE:* Testing all nodes can take awhile, especially for large sites. 
 

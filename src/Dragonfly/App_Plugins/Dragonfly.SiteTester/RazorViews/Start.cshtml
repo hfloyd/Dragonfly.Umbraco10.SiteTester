@@ -1,14 +1,13 @@
 @using Dragonfly.NetModels;
-@using Dragonfly.NetHelpers
-@using Dragonfly.UmbracoSiteTester
-@using Dragonfly.UmbracoSiteTester.Models
-@using Newtonsoft.Json
-@using Dragonfly.UmbracoHelpers
-@using Umbraco.Extensions
+@using Dragonfly.UmbracoSiteTester;
+@using Dragonfly.UmbracoSiteTester.Models;
 
-@inherits UmbracoViewPage<StatusMessage>
+@inject SiteTesterService TesterService
+
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<StatusMessage>
 
 @{
+	var config = TesterService.GetAppDataConfig();
     var status = Model;
 
     //var DisplayTitle = Dragonfly.Umbraco7Helpers.Mvc.GetSafeViewDataString(ViewData, "DisplayTitle");
@@ -17,9 +16,9 @@
     var SpecialMessageClass = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewDataString(ViewData, "SpecialMessageClass");
     var DeleteOptions = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewData(ViewData, "DeleteOptions") as Dictionary<string, string>;
 
-    var pvSS = HtmlHelpers.GetViewsPath() + "Partials/StylesScripts.cshtml";
-    var pvStatus = HtmlHelpers.GetViewsPath() + "Partials/StatusMessage.cshtml";
-    var pvFilesList = HtmlHelpers.GetViewsPath() + "Partials/FilesList.cshtml";
+    var pvSS = HtmlHelpers.GetViewsPath(config) + "Partials/StylesScripts.cshtml";
+    var pvStatus = HtmlHelpers.GetViewsPath(config) + "Partials/StatusMessage.cshtml";
+    var pvFilesList = HtmlHelpers.GetViewsPath(config) + "Partials/FilesList.cshtml";
     
 }
 <!DOCTYPE html>
@@ -49,10 +48,10 @@
         }
 
         <div class="d-inline-flex p-2" style="padding: .5em 0;">
-            <a class="btn btn-sm btn-success mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester//TestAllNodesAndSave">Test All Nodes Now</a>
+            <a class="btn btn-sm btn-success mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester/TestAllNodesAndSave">Test All Nodes Now</a>
         </div>
         <div class="d-inline-flex p-2" style="padding: .5em 0;">
-            <a class="btn btn-sm btn-success mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester//TestDescendantNodesAndSave?StartNode=0">Test Subset of Nodes...</a>
+            <a class="btn btn-sm btn-success mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester/TestDescendantNodesAndSave?StartNode=0">Test Subset of Nodes...</a>
         </div>
      
 
@@ -62,20 +61,20 @@
             <div class="d-inline-flex p-2" style="padding: .5em 0;">
                 @foreach (var option in DeleteOptions)
                 {
-                    var url = string.Format("/umbraco/backoffice/Dragonfly/SiteTester//DeleteResultSets?Option={0}", option.Key);
+                    var url = string.Format("/umbraco/backoffice/Dragonfly/SiteTester/DeleteResultSets?Option={0}", option.Key);
                     <a class="btn btn-sm btn-warning mr-2" href="@url">@option.Value</a>
                 }
             </div>
         }
 
         <h2>Search HTML</h2>
-        <form action="/umbraco/backoffice/Dragonfly/SiteTester//SearchAllHtml" method="post">
+        <form action="/umbraco/backoffice/Dragonfly/SiteTester/SearchAllHtml" method="post">
             <div class="form-group">
                 <label for="Filename">Test Result Set</label>
                 <select class="form-control" id="Filename" name="Filename" aria-describedby="testSetHelp">
                     @foreach (FileInfo file in FilesList.OrderByDescending(n => n.Timestamp))
                     {
-                        var logDate = HtmlHelpers.FormatUtcDateTime(file.Timestamp.ToUniversalTime());
+                        var logDate = HtmlHelpers.FormatUtcDateTime(config,file.Timestamp.ToUniversalTime());
                         var startNodeId = file.StartNode;
                         var nodeInfo = "";
                         if (startNodeId == 0)
@@ -87,11 +86,11 @@
                             var startNode = Umbraco.Content(startNodeId);
                             if (startNode == null)
                             {
-                                nodeInfo = string.Format("INVALID START NODE [{0}]", startNodeId);
+                                nodeInfo = $"INVALID START NODE [{startNodeId}]";
                             }
                             else
                             {
-                                nodeInfo = string.Format("'{0}' & descendants", startNode.Name);
+                                nodeInfo = $"'{startNode.Name}' & descendants";
                             }
                         }
 

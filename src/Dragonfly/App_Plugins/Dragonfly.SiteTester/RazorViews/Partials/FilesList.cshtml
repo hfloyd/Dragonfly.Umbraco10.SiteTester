@@ -1,12 +1,11 @@
-@using Dragonfly.NetModels
-@using Dragonfly.Umbraco8SiteTester.Utilities
 @using Dragonfly.UmbracoSiteTester
-@using Newtonsoft.Json
 
-@inherits UmbracoViewPage<IEnumerable<Dragonfly.UmbracoSiteTester.Models.FileInfo>>
+@inject SiteTesterService TesterService
 
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<IEnumerable<Dragonfly.UmbracoSiteTester.Models.FileInfo>>
 @{
-    var pvException = HtmlHelpers.GetViewsPath() + "Partials/ExceptionDetailsLink.cshtml";
+	var config = TesterService.GetAppDataConfig();
+    var pvException = HtmlHelpers.GetViewsPath(config) + "Partials/ExceptionDetailsLink.cshtml";
 }
 
 @if (Model != null && Model.Any())
@@ -15,8 +14,8 @@
         @foreach (var parsedFile in Model.OrderByDescending(n => n.Timestamp))
         {
 
-            var url = string.Format("/umbraco/backoffice/Dragonfly/SiteTester//ViewResults?FileName={0}", parsedFile.Filename);
-            var logDate = HtmlHelpers.FormatUtcDateTime(parsedFile.Timestamp.ToUniversalTime());
+            var url = string.Format("/umbraco/backoffice/Dragonfly/SiteTester/ViewResults?FileName={0}", parsedFile.Filename);
+            var logDate = HtmlHelpers.FormatUtcDateTime(config,parsedFile.Timestamp.ToUniversalTime());
             //var parsedFile = FilesIO.ParseFilePath(file.Key);
             var startNodeId = parsedFile.StartNode;
             var nodeInfo = "";

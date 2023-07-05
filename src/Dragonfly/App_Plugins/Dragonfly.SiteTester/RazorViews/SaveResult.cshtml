@@ -1,10 +1,12 @@
 @using Dragonfly.NetModels;
-@using Dragonfly.UmbracoSiteTester
-@using Newtonsoft.Json
+@using Dragonfly.UmbracoSiteTester;
 
-@inherits UmbracoViewPage<StatusMessage>
+@inject SiteTesterService TesterService
+
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<StatusMessage>
 
 @{
+	var config = TesterService.GetAppDataConfig();
     var status = Model;
 
     var Message = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewDataString(ViewData, "Message");
@@ -12,15 +14,15 @@
     //var LogData = Dragonfly.Umbraco7Helpers.Mvc.GetSafeViewData(ViewData, "LogData") as ProductAvailabilityNotificationsLog;
     var Filename = Dragonfly.UmbracoHelpers.Mvc.GetSafeViewDataString(ViewData, "Filename");
     
-    var fileUrl = string.Format("/umbraco/backoffice/Dragonfly/SiteTester//ViewResults?FileName={0}", Filename);
+    var fileUrl = string.Format("/umbraco/backoffice/Dragonfly/SiteTester/ViewResults?FileName={0}", Filename);
 
     //Column Widths
     var col1Class = "col-sm-3";
     var col2Class = "col-sm-9";
 
-    var pvException = HtmlHelpers.GetViewsPath() + "Partials/ExceptionDetailsLink.cshtml";
-    var pvSS = HtmlHelpers.GetViewsPath() + "Partials/StylesScripts.cshtml";
-    var pvStatus = HtmlHelpers.GetViewsPath() + "Partials/StatusMessage.cshtml";
+    var pvException = HtmlHelpers.GetViewsPath(config) + "Partials/ExceptionDetailsLink.cshtml";
+    var pvSS = HtmlHelpers.GetViewsPath(config) + "Partials/StylesScripts.cshtml";
+    var pvStatus = HtmlHelpers.GetViewsPath(config) + "Partials/StatusMessage.cshtml";
 }
 <!DOCTYPE html>
 <html>
@@ -31,7 +33,7 @@
     <div class="container">
 
         <div class="d-inline-flex p-2" style="padding: .5em 0;">
-            <a class="btn btn-sm btn-primary mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester//Start">Back to Start</a>
+            <a class="btn btn-sm btn-primary mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester/Start">Back to Start</a>
         </div>
 
         <h1>Save Test Results</h1>
@@ -69,10 +71,10 @@
                                 <dd class="@col2Class">
                                     <b> @result.Message</b><br />
                                     @result.MessageDetails
-                                    @if (result.RelatedException != null)
+                                    @if (result.GetRelatedException() != null)
                                     {
-                                        <br /><pre>@result.RelatedException.Message</pre>
-                                        @Html.Partial(pvException, result.RelatedException)
+                                        <br /><pre>@result.GetRelatedException().Message</pre>
+                                        @Html.Partial(pvException, result.GetRelatedException())
                                     }
                                 </dd>
                             </dl>

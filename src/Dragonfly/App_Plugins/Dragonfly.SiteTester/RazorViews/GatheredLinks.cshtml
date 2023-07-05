@@ -1,12 +1,15 @@
-@using System.Web.Mvc.Html
 @using Dragonfly.NetHelpers
 @using Dragonfly.NetModels;
-@using Dragonfly.UmbracoSiteTester
-@using Dragonfly.UmbracoSiteTester.Models
+@using Dragonfly.UmbracoSiteTester;
+@using Dragonfly.UmbracoSiteTester.Models;
 
-@inherits Umbraco.Web.Mvc.UmbracoViewPage<StatusMessage>
+@inject SiteTesterService TesterService
+
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<StatusMessage>
 
 @{
+	var config = TesterService.GetAppDataConfig();
+
     var status = Model;
 
     //var DisplayTitle = Dragonfly.Umbraco7Helpers.Mvc.GetSafeViewDataString(ViewData, "DisplayTitle");
@@ -19,16 +22,16 @@
     var col1Class = "col-sm-3";
     var col2Class = "col-sm-9";
 
-    var pvException = HtmlHelpers.GetViewsPath() + "Partials/ExceptionDetailsLink.cshtml";
-    var pvSS = HtmlHelpers.GetViewsPath() + "Partials/StylesScripts.cshtml";
-    var pvStatus = HtmlHelpers.GetViewsPath() + "Partials/StatusMessage.cshtml";
-    var pvFilesList = HtmlHelpers.GetViewsPath() + "Partials/FilesList.cshtml";
+    var pvException = HtmlHelpers.GetViewsPath(config) + "Partials/ExceptionDetailsLink.cshtml";
+    var pvSS = HtmlHelpers.GetViewsPath(config) + "Partials/StylesScripts.cshtml";
+    var pvStatus = HtmlHelpers.GetViewsPath(config) + "Partials/StatusMessage.cshtml";
+    var pvFilesList = HtmlHelpers.GetViewsPath(config) + "Partials/FilesList.cshtml";
 
     //QS Vals
-    var fileName = Request.QueryString["FileName"];
-    var typeFilter = Request.QueryString["TypeFilter"];
-    var doTestFilter = Request.QueryString["DoTestFilter"];
-    var resultFilter = Request.QueryString["ResultFilter"];
+    var fileName = Context.Request.Query["FileName"];
+    var typeFilter = Context.Request.Query["TypeFilter"];
+    var doTestFilter = Context.Request.Query["DoTestFilter"];
+    var resultFilter = Context.Request.Query["ResultFilter"];
 
     //Filtering
     var isTypeFiltered = !string.IsNullOrEmpty(typeFilter);
@@ -45,7 +48,7 @@
     }
     else if (isDoTestFiltered)
     {
-        displayTitle = doTestFilter.ToLower() == "true" ? "Tested Links" : "UnTested Links";
+        displayTitle = doTestFilter.ToString().ToLower() == "true" ? "Tested Links" : "UnTested Links";
         displayLinks = FullLinksSet.LinkTests.Where(n => n.DoTest.ToString() == doTestFilter);
     }
     else if (isResultFiltered)
@@ -60,12 +63,12 @@
     }
 
     //Remove all filters for baseUrl
-    var baseUrl = Request.Url.ToString();
-    baseUrl = Dragonfly.NetHelpers.Url.RemoveQueryStringKeyFromUrl(baseUrl, "DoTestFilter");
-    baseUrl = Dragonfly.NetHelpers.Url.RemoveQueryStringKeyFromUrl(baseUrl, "TypeFilter");
-    baseUrl = Dragonfly.NetHelpers.Url.RemoveQueryStringKeyFromUrl(baseUrl, "ResultFilter");
+    var baseUrl = Context.Request.Url().ToString();
+    baseUrl = Dragonfly.NetHelpers.Urls.RemoveQueryStringKeyFromUrl(baseUrl, "DoTestFilter");
+    baseUrl = Dragonfly.NetHelpers.Urls.RemoveQueryStringKeyFromUrl(baseUrl, "TypeFilter");
+    baseUrl = Dragonfly.NetHelpers.Urls.RemoveQueryStringKeyFromUrl(baseUrl, "ResultFilter");
 
-    var resultsDate = TestResultSet.TestStartTimestamp != DateTime.MinValue ? HtmlHelpers.FormatUtcDateTime(TestResultSet.TestStartTimestamp.ToUniversalTime()) : "Unknown";
+    var resultsDate = TestResultSet.TestStartTimestamp != DateTime.MinValue ? HtmlHelpers.FormatUtcDateTime(config, TestResultSet.TestStartTimestamp.ToUniversalTime()) : "Unknown";
     var durationSpan = (TestResultSet.TestEndTimestamp - TestResultSet.TestStartTimestamp);
     var nodeInfo = TestResultSet.StartNode == 0 ? "All Nodes" : string.Format("'{0}' & descendants", Umbraco.Content(TestResultSet.StartNode).Name);
 
@@ -80,10 +83,10 @@
     <div class="container">
 
         <div class="d-inline-flex p-2" style="padding: .5em 0;">
-            <a class="btn btn-sm btn-primary mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester//Start">Back to Start</a>
+            <a class="btn btn-sm btn-primary mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester/Start">Back to Start</a>
             <a class="btn btn-sm btn-info mr-2" href="@baseUrl">Remove All Filters</a>
 
-            <!--  <a class="btn btn-sm btn-success mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester//TestAllNodesAndSave">Test All Nodes Now</a>-->
+            <!--  <a class="btn btn-sm btn-success mr-2" href="/umbraco/backoffice/Dragonfly/SiteTester/TestAllNodesAndSave">Test All Nodes Now</a>-->
         </div>
         
         <h1>Links</h1>
@@ -120,7 +123,7 @@
                                     {
                                         var isTested = FullLinksSet.TypesTested.Contains(summ.Key);
                                         var marker = isTested ? "*" : "";
-                                        var filterUrl = Dragonfly.NetHelpers.Url.AppendQueryStringToUrl(baseUrl, "TypeFilter", summ.Key);
+                                        var filterUrl = Dragonfly.NetHelpers.Urls.AppendQueryStringToUrl(baseUrl, "TypeFilter", summ.Key);
                                     <div><a href="@filterUrl"><b>@summ.Key</b></a> : <span>@summ.Value</span>@marker</div>
                                     }
                                 </dd>
@@ -130,7 +133,7 @@
                                 <dd class="@col2Class">
                                     @foreach (var summ in FullLinksSet.DoTestSummary)
                                     {
-                                        var filterUrl = Dragonfly.NetHelpers.Url.AppendQueryStringToUrl(baseUrl, "DoTestFilter", summ.Key.ToString());
+                                        var filterUrl = Dragonfly.NetHelpers.Urls.AppendQueryStringToUrl(baseUrl, "DoTestFilter", summ.Key.ToString());
                                         <div><a href="@filterUrl"><b>@summ.Key</b></a> : <span>@summ.Value</span></div>
                                     }
                                 </dd>
@@ -140,7 +143,7 @@
                                 <dd class="@col2Class">
                                     @foreach (var summ in FullLinksSet.ResultsSummary)
                                     {
-                                        var filterUrl = Dragonfly.NetHelpers.Url.AppendQueryStringToUrl(baseUrl, "ResultFilter", summ.Key.ToString());
+                                        var filterUrl = Dragonfly.NetHelpers.Urls.AppendQueryStringToUrl(baseUrl, "ResultFilter", summ.Key.ToString());
                                         <div><a href="@filterUrl"><b>@summ.Key</b></a> : <span>@summ.Value</span></div>
                                     }
                                 </dd>
@@ -223,10 +226,10 @@
                 }
                 else
                 {
-                    var retestUrl = "/umbraco/backoffice/Dragonfly/SiteTester//TestAllNodesAndSave";
+                    var retestUrl = "/umbraco/backoffice/Dragonfly/SiteTester/TestAllNodesAndSave";
                     if (TestResultSet.StartNode != 0)
                     {
-                        retestUrl = string.Format("/umbraco/backoffice/Dragonfly/SiteTester//TestDescendantNodesAndSave?StartNode={0}", TestResultSet.StartNode);
+                        retestUrl = string.Format("/umbraco/backoffice/Dragonfly/SiteTester/TestDescendantNodesAndSave?StartNode={0}", TestResultSet.StartNode);
                     }
 
                     <i style="color:red;">There is no data available currently.</i>

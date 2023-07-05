@@ -1,15 +1,19 @@
 {
     "DragonflySiteTester": {
-        // "HttpUrl" is needed for HTTP Rendering, determines URL of the default.aspx page on your host. I recommend you use
-        //127.0.0.1 and set the "HttpHost" to your domain to avoid problems with name resolution, firewalls, etc. 
-        "HttpUrl": "http://127.0.0.1/default.aspx",
-        "HttpHost": "MYSITE.COM", //Domain name of your site e.g. www.yoursite.com
+        // "HttpUrl" is needed for HTTP Rendering, determines URL of the default page on your host. 
+        "HttpUrl": "https://MySite.com/default",
+        "HttpHost": "MYSITE.COM", //Domain name of your site e.g. 'www.yoursite.com'
+        "IgnoreSslErrors": false, //Set to true if on a local development environment, or getting SSL Errors 
         "HttpTimeout": 360, //Rendering request timeout in seconds
         "ScriptTimeout": 1200, //Override default IIS timeout in seconds
         "DataStoragePath": "/App_Data/DragonflySiteTester/", //Location of the saved Test Result Sets
         "StoreRenderedHtml": false, //Store Full Rendered HTML in ResultSets? *Warning: This adds a LOT of extra data to saved result sets, which means larger .json files and slower load-times for Viewing Results
         "AlsoTestOnPageLinks": false, //Gather all on-page out-bound links and test them as well? *Warning: This adds a LOT of extra data to saved result sets, which means larger .json files and slower load-times for Viewing Results
+        "ContentTypesToExclude": [
+            "myDocTypeAlias"
+        ], //Document Types to Exclude - Any DocType aliases added here will be skipped during testing. 
         "LinkTypesToTest": [
+            "InternalPage",
             "InternalPageWithQueryString",
             "InternalFile"
         ], //Link Types to Test - Available Options: "External", "InternalPage", "InternalPageWithQueryString", "InternalFile", "Asset" 

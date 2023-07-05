@@ -1,105 +1,111 @@
 @using System.Collections
-@using Dragonfly.NetModels;
 @using Dragonfly.UmbracoSiteTester
 @using Newtonsoft.Json
 
-@model Exception
+@inject SiteTesterService TesterService
 
+@model Dragonfly.UmbracoSiteTester.Models.SerializableException
 @{
-    var displayTitle = string.Format("Exception Details");
+	var config = TesterService.GetAppDataConfig();
+	var displayTitle = string.Format("Exception Details");
 
-    //Column Widths
-    var col1Class = "col-sm-2";
-    var col2Class = "col-sm-10";
+	//Column Widths
+	var col1Class = "col-sm-2";
+	var col2Class = "col-sm-10";
 
-    var pvSS = HtmlHelpers.GetViewsPath() + "Partials/StylesScripts.cshtml";
+	var pvSS = HtmlHelpers.GetViewsPath(config) + "Partials/StylesScripts.cshtml";
+	var pvEx = HtmlHelpers.GetViewsPath(config) + "Partials/ExceptionDetailsLink.cshtml";
+
 }
 
 <!DOCTYPE html>
 <html>
 <head>
-    @Html.Partial(pvSS, "styles")
+	@Html.Partial(pvSS, "styles")
 </head>
 <body>
-    <div class="container">
+	<div class="container">
 
-        <h1>@displayTitle</h1>
-        @if (Model == null)
-        {<b style="color:red;">No valid Exception to display.</b>}
-        else
-        {
-            <div class="card card-default">
-                <h5 class="card-header">@Model.Message</h5>
-                <div class="card-body">
-                    <dl class="row">
-                        <dt class="@col1Class">Exception Type</dt>
-                        <dd class="@col2Class">@Model.GetType()</dd>
-                    </dl>
-                    <dl class="row">
-                        <dt class="@col1Class">Source</dt>
-                        <dd class="@col2Class">@Model.Source</dd>
-                    </dl>
+		<h1>@displayTitle</h1>
+		@if (Model == null)
+		{
+			<b style="color:red;">No valid Exception to display.</b>
+		}
+		else
+		{
+			<div class="card card-default">
+				<h5 class="card-header">@Model.Message</h5>
+				<div class="card-body">
+					<dl class="row">
+						<dt class="@col1Class">Exception Type</dt>
+						<dd class="@col2Class">@Model.ClassName</dd>
+					</dl>
+					<dl class="row">
+						<dt class="@col1Class">Source</dt>
+						<dd class="@col2Class">@Model.Source</dd>
+					</dl>
 
-                    <dl class="row">
-                        <dt class="@col1Class">Stack Trace</dt>
-                        <dd class="@col2Class">
-                            <pre> @Model.StackTrace</pre>
-                        </dd>
-                    </dl>
+					<dl class="row">
+						<dt class="@col1Class">Stack Trace</dt>
+						<dd class="@col2Class">
+							<pre> @Model.StackTrace</pre>
+						</dd>
+					</dl>
 
-                    <dl class="row">
-                        <dt class="@col1Class">Data</dt>
-                        <dd class="@col2Class">@FormatDataInfo(Model.Data)</dd>
-                    </dl>
+					<dl class="row">
+						<dt class="@col1Class">Data</dt>
+						<dd class="@col2Class">@{
+								FormatDataInfo(Model.Data);
+							}</dd>
+					</dl>
 
-                    <dl class="row">
-                        <dt class="@col1Class">Inner Exception</dt>
-                        @if (Model.InnerException != null)
-                        {
-                            var pv = HtmlHelpers.GetViewsPath() + "Partials/ExceptionDetailsLink.cshtml";
-                            <dd class="@col2Class">
-                                @Model.InnerException.Message
-                                @Html.Partial(pv, Model.InnerException)
-                            </dd>
-                        }
-                        else
-                        {
-                            <dd class="@col2Class">None</dd>
-                        }
-                    </dl>
+					<dl class="row">
+						<dt class="@col1Class">Inner Exception</dt>
+						@if (Model.InnerException!=null)
+						{
+							<dd class="@col2Class">
+								@Model.InnerException.Message
+								@Html.Partial(pvEx, Model.InnerException)
+							</dd>
+						}
+						else
+						{
+							<dd class="@col2Class">None</dd>
+						}
+					</dl>
 
-                </div>
+				</div>
 
-            </div>
-        }
-    </div>
+			</div>
+		}
+	</div>
 
-@*@Html.Partial(pvSS, "scripts")*@
+	@*@Html.Partial(pvSS, "scripts")*@
 </body>
 </html>
 
-@functions{
+@functions {
 
-	private void FormatDataInfo(IDictionary Data)
-{
-    if (Data.Count > 0)
-    {
-        foreach (DictionaryEntry entry in Data)
-        {
-            <div><b>@entry.Key</b> : <span>@entry.Value</span></div>
-        }
-    }
-    else
-    {
-        <text>None</text>
-    }
+	private void FormatDataInfo(IDictionary? Data)
+	{
+		if (Data != null && Data.Count > 0)
+		{
+			foreach (DictionaryEntry entry in Data)
+			{
+				<div><b>@entry.Key</b> : <span>@entry.Value</span></div>
+			}
+		}
+		else
+		{
+			<text>None</text>
+		}
 
-}
-private void ExceptionDetailsLink(Exception ExceptionModel)
+	}
+	private void ExceptionDetailsLink(Exception ExceptionModel)
 	{
 		var exceptionJson = JsonConvert.SerializeObject(ExceptionModel);
 
-        <form action="/umbraco/backoffice/Dragonfly/DeployTools/ViewException" method="post">
+		<form action="/umbraco/backoffice/Dragonfly/DeployTools/ViewException" method="post">
 			@Html.Hidden("ExceptionJson", exceptionJson)
 			<button class="btn btn-info btn-sm" value="Submit" type="Submit"><small>Exception Details...</small></button>
 		</form>

@@ -1,17 +1,26 @@
 @using Dragonfly.NetModels
 @using Dragonfly.UmbracoSiteTester
-@using Newtonsoft.Json
 
-@inherits UmbracoViewPage<StatusMessage>
+@inject SiteTesterService TesterService
 
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<StatusMessage>
 @{
-    var pvException = HtmlHelpers.GetViewsPath() + "Partials/ExceptionDetailsLink.cshtml";
+	var config = TesterService.GetAppDataConfig();
+    var pvException = HtmlHelpers.GetViewsPath(config) + "Partials/ExceptionDetailsLink.cshtml";
 }
 
 @if (Model.Message != "")
 {
     <h3 style="color: red;">@Model.Message</h3>
-    <p>@Model.MessageDetails</p>
+    @if (Model.DetailedMessages.Any())
+    {
+	    <ul>
+            @foreach (var msg in Model.DetailedMessages)
+		    {
+                <li>@msg</li>
+		    }
+	    </ul>
+    }
 }
 
 @if (Model.InnerStatuses.Any())
@@ -34,11 +43,11 @@
                     <br/>
                     @innerMsg.MessageDetails
                 }
-                @if (innerMsg.RelatedException != null)
+                @if (innerMsg.GetRelatedException() != null)
                 {
                     <br/>
-                    <pre>@innerMsg.RelatedException.Message</pre>
-                    @Html.Partial(pvException, innerMsg.RelatedException)
+                    <pre>@innerMsg.GetRelatedException().Message</pre>
+                    @Html.Partial(pvException, innerMsg.GetRelatedException())
                 }
                 <br/>
             </li>

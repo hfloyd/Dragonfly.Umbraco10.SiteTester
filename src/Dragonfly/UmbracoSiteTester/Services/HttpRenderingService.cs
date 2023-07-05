@@ -6,11 +6,12 @@
 	using System.IO;
 	using System.Linq;
 	using System.Net;
-	using System.Web;
-	using Dragonfly.UmbracoSiteTester.Models;
+    using System.Net.Security;
+    using System.Web;
+    using Dragonfly.UmbracoSiteTester.Models;
 	using Microsoft.AspNetCore.Http;
-	using Microsoft.Extensions.Logging;
-	using Umbraco.Cms.Core.Cache;
+    using Microsoft.Extensions.Logging;
+    using Umbraco.Cms.Core.Cache;
 	using Umbraco.Cms.Core.Models;
 	using Umbraco.Cms.Core.Services;
 	using Umbraco.Cms.Core.Web;
@@ -42,11 +43,10 @@
 		/// </summary>
 		public string HttpHost { get; set; }
 
+        public bool IgnoreSslErrors { get; set; }
+
 		public HttpRenderingService(DependencyLoader dependencies,
-			ILogger logger,
-			string HttpHost,
-			string HttpUrl = "http://127.0.0.1/default.aspx",
-			int RequestTimeoutSeconds = 120, int ScriptTimeoutSeconds = 1200)
+			ILogger<HttpRenderingService> logger)
 		{
 			this._logger = logger;
 			this._httpContext = dependencies.Context;
@@ -54,14 +54,24 @@
 			var hasUmbContext = dependencies.UmbracoContextAccessor.TryGetUmbracoContext(out _umbracoContext);
 			this._umbracoHelper = dependencies.UmbHelper;
 			this._services = dependencies.Services;
+        }
 
-			this.HttpUrl = HttpUrl;
+		public void SetProps(
+		string HttpHost,
+		string HttpUrl,
+		bool IgnoreSslErrors,
+		int RequestTimeoutSeconds = 120, 
+		int ScriptTimeoutSeconds = 1200)
+		{
+            this.HttpUrl = HttpUrl;
 			this.HttpHost = HttpHost;
+            this.IgnoreSslErrors = IgnoreSslErrors;
 			this.RequestTimeoutSeconds = RequestTimeoutSeconds;
 			this.ScriptTimeoutSeconds = ScriptTimeoutSeconds;
 		}
+		
 
-		internal HttpResult HttpRenderNode(IContent Content, out string Html)
+        internal HttpResult HttpRenderNode(IContent Content, out string Html)
 		{
 			// this can take a while, if we're running sync this is needed
 			SetScriptTimeout();
@@ -142,13 +152,6 @@
 		/// Use Http Web Requests to render a node to a string
 		/// </summary>
 		/// <remarks>
-		/// this calls Umbraco's default.aspx rather than attempt to figure out
-		/// the standard umbraco "nice" url. Simply because we can't get the
-		/// nice URL without a valid Http Context in the first place. Also, 
-		/// the query string we pass to the client page in RenderTemplate
-		/// is replaced with a cookie here, simply because adding items
-		/// to the query string for default.aspx doesn't actually make
-		/// them visible to the page being rendered. Grrrrrrr. 
 		/// </remarks>
 		/// <param name="PageId"></param>
 		/// <param name="cookieDictionary"></param>
@@ -160,11 +163,8 @@
 			if (string.IsNullOrEmpty(defaultUrl))
 			{ throw new ArgumentException("HttpUrl must be set to use Http node rendering"); }
 
-			var firstSeparator = "?";
-			if (defaultUrl.Contains('?'))
-				firstSeparator = "&";
-
-			var url = string.Format("{0}{1}umbpageid={2}", defaultUrl, firstSeparator, PageId);
+            var route = _umbracoContext.Content?.GetRouteById(PageId);
+            var url = $"{defaultUrl}{route}";
 
 			//get timeout
 			var httpTimeout = this.RequestTimeoutSeconds * 1000;
@@ -194,7 +194,11 @@
 			webRequest.Method = "GET";
 			webRequest.ContentType = "text/html";
 			webRequest.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
-
+            ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, errors) =>
+            {
+                if (this.IgnoreSslErrors) return true;
+                return errors == SslPolicyErrors.None ;
+            };
 			try
 			{
 				var result = TryRequest(webRequest, out FullHtml);
@@ -393,6 +397,7 @@
 			return resultStatus;
 		}
 
+	
 	}
 }
 

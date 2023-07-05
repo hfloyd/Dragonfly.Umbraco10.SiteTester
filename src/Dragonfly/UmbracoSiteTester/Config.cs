@@ -14,7 +14,7 @@
          #region Properties
 
         [JsonProperty("HttpUrl")]
-        public string HttpUrl { get; set; }= "http://127.0.0.1/default.aspx";
+        public string HttpUrl { get; set; }= "http://127.0.0.1";
 
         [JsonProperty("HttpHost")] 
         public string HttpHost { get; set; } = "";
@@ -35,19 +35,25 @@
         public bool AlsoTestOnPageLinks { get; set; }= false;
 
         [JsonProperty("LinkTypesToTest")]
-        public List<string> LinkTypesToTest { get; set; }
+        public List<string> LinkTypesToTest { get; set; }= new List<string>();
 
         [JsonProperty("InternalDomains")]
-        public List<string> InternalDomains { get; set; }
+        public List<string> InternalDomains { get; set; }= new List<string>();
 
         [JsonProperty("PageExtensions")]
-        public List<string> PageExtensions { get; set; }
+        public List<string> PageExtensions { get; set; }= new List<string>();
 
         [JsonProperty("LocalTimezone")]
         public string LocalTimezone { get; set; }= "";
 
-        [JsonProperty("InlineErrorStrings")]
-        public List<string> InlineErrorStrings { get; set; }
+        [JsonProperty("InlineErrorStrings")] 
+        public List<string> InlineErrorStrings { get; set; } = new List<string>();
+
+        [JsonProperty("IgnoreSslErrors")] 
+        public bool IgnoreSslErrors { get; set; } = false;
+        
+        [JsonProperty("ContentTypesToExclude")] 
+        public List<string> ContentTypesToExclude { get; set; }= new List<string>();
 
         #endregion
 

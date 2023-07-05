@@ -1,11 +1,14 @@
 ﻿namespace Dragonfly.UmbracoSiteTester
 {
+    using Polly;
     using System;
+    using Azure.Core;
+    using Microsoft.AspNetCore.Http;
 
     /// <summary>
     /// Static class with various information and constants about the package.
     /// </summary>
-    public class SiteTesterPackage 
+    public class SiteTesterPackage
     {
         /// <summary>
         /// Gets the alias of the package.
@@ -41,5 +44,8 @@
 
     }
 
-
+    //public static class TempExtensions
+    //{
+       
+    //}
 }
