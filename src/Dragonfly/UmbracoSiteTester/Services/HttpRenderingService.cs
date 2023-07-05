@@ -350,6 +350,7 @@
 
 					resultStatus.StatusCode = webResponse.StatusCode;
 					resultStatus.StatusCodeMessage = webResponse.StatusDescription;
+					
 					webResponse.Close();
 				}
 			}

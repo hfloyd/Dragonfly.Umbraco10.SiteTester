@@ -7,8 +7,8 @@
     {
         public HttpStatusCode StatusCode { get; set; }
 
-        public string StatusCodeMessage { get; set; }
+        public string StatusCodeMessage { get; set; } = "";
 
-        public Exception ErrorException { get; set; }
+        public Exception? ErrorException { get; set; }
     }
 }
