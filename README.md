@@ -18,6 +18,7 @@ dotnet add package Dragonfly.Umbraco10.SiteTester
 
 ```
 
+You need to add a section to the top-level of your appSettings. You can copy it from [here](https://github.com/hfloyd/Dragonfly.Umbraco10.SiteTester/blob/master/src/example_appSettings.json). 
 
 ## Features ##
 
@@ -28,7 +29,7 @@ dotnet add package Dragonfly.Umbraco10.SiteTester
 
 ## Usage ##
 
-After installation, make sure you are logged-in as a User in the Umbraco back-office, and visit the Url:
+After NuGet installation and appSettings config, make sure you are logged-in as a User in the Umbraco back-office, and visit the Url:
 http://YOURSITE.COM/umbraco/backoffice/Dragonfly/SiteTester/Start
 
 Or look for the 'Site Tester' dashboard in the Content section.
