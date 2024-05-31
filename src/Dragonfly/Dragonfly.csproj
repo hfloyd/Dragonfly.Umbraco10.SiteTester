@@ -18,8 +18,6 @@
 		<RepositoryUrl>https://github.com/hfloyd/Dragonfly.Umbraco10.SiteTester</RepositoryUrl>
 		<PackageIcon>Dragonfly-SiteTester-128.png</PackageIcon>
 		<PackageTags>Umbraco;umbraco-marketplace;Umbraco-10;Umbraco-11;Umbraco-12</PackageTags>
-
-		<PackageReleaseNotes>Fixes and Updates</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<!-- Author Info + Legal-->
@@ -37,12 +35,13 @@
 	<PropertyGroup>
 		<RootNamespace>Dragonfly</RootNamespace>
 		<AssemblyName>Dragonfly.UmbracoSiteTester</AssemblyName>
-		<Version>1.1.0</Version>
+		<Version>1.2.0</Version>
 		<AssemblyVersion>$(Version)</AssemblyVersion>
 		<FileVersion>$(Version)</FileVersion>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<Nullable>enable</Nullable>
+		<PackageReleaseNotes>Fixing dependencies</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<!-- Include Package Items -->
@@ -63,11 +62,11 @@
 
 	<!-- Packages-->
 	<ItemGroup>
-		<PackageReference Include="Dragonfly.Net5" Version="1.6.0" />
-		<PackageReference Include="Dragonfly.Umbraco9" Version="1.7.0" />
-		<PackageReference Include="Umbraco.Cms.Core" Version="[10.0.1,13.0.0]" />
-		<PackageReference Include="Umbraco.Cms.Web.Website" Version="[10.0.1,13.0.0]" PrivateAssets="All" />
-		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="[10.0.1,13.0.0]" PrivateAssets="All" />
+		<PackageReference Include="Dragonfly.Net6" Version="1.0.0" />
+		<PackageReference Include="Dragonfly.Umbraco10" Version="1.1.0" />
+		<PackageReference Include="Umbraco.Cms.Core" Version="[10.0.1,13.999.999]" />
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="[10.0.1,13.999.999]" PrivateAssets="All" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="[10.0.1,13.999.999]" PrivateAssets="All" />
 	</ItemGroup>
 
 	<!--Include App_Plugins & targets file-->
